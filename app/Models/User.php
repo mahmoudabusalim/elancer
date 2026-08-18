@@ -3,7 +3,9 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
+// use Database\Factories\UserFactory;
+// use App\Models\Freelancer;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +14,7 @@ use Illuminate\Notifications\Notifiable;
 
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -29,4 +31,16 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+
+    public function freelancer(){
+        return $this->hasOne(Freelancer::class,'user_id','id')
+        ->withDefault();
+    }
+
+    public function projects()
+    {
+        return $this->hasMany(Project::class,'user_id','id');
+    }
+
 }
