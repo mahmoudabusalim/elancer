@@ -53,7 +53,7 @@
                             <h5>Tags <span>(optional)</span> <i class="help-icon" data-tippy-placement="right" title="Maximum of 10 tags"></i></h5>
                             <div class="keywords-container">
                                 <div class="keyword-input-container">
-                                    <x-form.input name="tags" id="tags" :value="implode(', ', $tags)" type="text" class="keyword-input with-border" placeholder="e.g. job title, responsibilites" />
+                                    <x-form.input name="tags" id="tags" :value=" implode(', ' ,$tags)" type="text" class="keyword-input with-border" placeholder="e.g. job title, responsibilites" />
                                     <button type="button" class="keyword-input-button ripple-effect"><i class="icon-material-outline-add"></i></button>
                                 </div>
                                 <div class="keywords-list">

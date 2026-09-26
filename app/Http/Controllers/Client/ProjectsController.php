@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\ProjectRequest;
 use App\Models\Project;
+use App\Models\Category;
+use App\Models\Tag;
 // use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class ProjectsController extends Controller
 {
@@ -17,7 +20,9 @@ class ProjectsController extends Controller
     {
         $user = Auth::user();
         // $projects = Project::where('user_id', '=' , $user->id )->paginate();
-        $projects = $user->projects()->paginate();
+        // use egerlouding بنستخدم الegerlouding عشان نقلل عدد جمل الاستعلام الي بتتعمل علي BD
+        
+        $projects = $user->projects()->with('category.parent','tags')->paginate();
         return view('client.projects.index',compact('projects'));
     }
 
@@ -29,6 +34,9 @@ class ProjectsController extends Controller
         return view('client.projects.create',
         [
             'project' => new Project(),
+            'types' => Project::types(),
+            'categories' => $this->categories(),
+            'tags' => [],
         ]);
     }
 
@@ -37,17 +45,17 @@ class ProjectsController extends Controller
      */
     public function store(ProjectRequest $request)
     {
+        
 
         $user = $request->user();
-        // $request->merge([
-        //     'user_id' => Auth::id(), //$request->user()->id;
-        // ]);
+       
+        $project = $user->projects()->create($request->all()); 
 
-        // $project = Project::create($request->all());
+        $tags = explode(',',$request->input('tags'));
+        $project->syncTags($tags);
+        
 
-        //  Create new project use the relation between models .
 
-        $project = $user->projscts()->create($request->all());
 
         return redirect()
         ->route('client.projects.index')
@@ -76,8 +84,11 @@ class ProjectsController extends Controller
     {
         $user = Auth::user();
         $project = $user->projects()->findOrFail($id);
+        $tags = $project->tags()->pluck('name')->toArray();
+        $types = Project::types();
+        $categories = $this->categories();
 
-        return view('client.projects.edit',compact('project'));
+        return view('client.projects.edit',compact(['project','types','categories', 'tags']));
     }
 
     /**
@@ -89,6 +100,9 @@ class ProjectsController extends Controller
         $project = $user->projects()->findOrFail($id);
 
         $project->update($request->all());
+
+        $tags = explode(',',$request->input('tags'));
+        $project->syncTags($tags);
 
         return redirect()
         ->route('client.projects.index')
@@ -114,5 +128,11 @@ class ProjectsController extends Controller
         return redirect()
         ->route('client.projects.index')
         ->with('success','Project Deleted');
+    }
+
+    protected function categories()
+    {
+        return Category::pluck('name','id')->toArray();
+
     }
 }

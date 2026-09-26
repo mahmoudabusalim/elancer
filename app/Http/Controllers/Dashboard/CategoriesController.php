@@ -14,72 +14,58 @@ use Illuminate\Support\Str;
 
 class CategoriesController extends Controller
 {
-    protected $rules=[
-            'name'=>['required',
+    protected $rules = [
+        'name' => [
+            'required',
             'string',
             'max:255',
             'min:2',
             'filter'
         ],
-            'parent_id'=>'nullable|int|exists:categories,id',
-            'description'=>'required|string',
-            'art_file'=>['nullable','image']
-        ];
+        'parent_id' => 'nullable|int|exists:categories,id',
+        'description' => 'required|string',
+        'art_file' => ['nullable', 'image']
+    ];
     protected $messages = [
-            'required' => 'The :attribute field is mandatory',
-        ];
+        'required' => 'The :attribute field is mandatory',
+    ];
     protected function rules()
-        {
-            $rules = $this->rules;
-            // $rules['name'][] = function($attribute,$value,$fail){
-            //     if($value == 'god'){
-            //         $fail('this word is not allowed');
-            //     }
-            // };
+    {
+        $rules = $this->rules;
 
-            // OR
-            // $rules['name'][] = new FilterRule();
-            // __________________________________________________
-            return $rules;
-        }
+        return $rules;
+    }
     //Action
     public function index($id = null)
     {
 
-         $categories = Category::leftjoin('categories as parents', 'parents.id', '=', 'categories.parent_id')
+        $categories = Category::leftjoin('categories as parents', 'parents.id', '=', 'categories.parent_id')
             ->select([
                 'categories.*',
                 'parents.name as parent_name'
             ])->paginate(3);
 
-    //    $categories1 = DB::table('categories')->get();
-    //    $categories = Category::all();
 
-       $title = 'Categories';
-    //    return veiw('categories',compact('categories','title'));
-        //   OR
-          return view('categories.index',
-          [
-            'categories' => $categories,
-            'title' => 'Categories',
-            'flashMassage' => session('success')
-          ]);
-        //   OR
-        //   return view('categories')->with([
-        //     'title' => $title,
-        //     'categories' => $categories,
 
-        //   ]);
+        $title = 'Categories';
+
+        return view(
+            'categories.index',
+            [
+                'categories' => $categories,
+                'title' => 'Categories',
+                'flashMassage' => session('success')
+            ]
+        );
     }
-    public function show(Category $category){
+    public function show(Category $category)
+    {
 
-    //  $category = DB::table('categories')->where('id','=',$id)->first();
-    //  $category = Category::where('id','=',$id)->first();
-    //  $category = Category::findOrFail($category);
-            if($category == null){
-                abort(404);
-             }
-        return view('categories.show',[
+
+        if ($category == null) {
+            abort(404);
+        }
+        return view('categories.show', [
             'category' => $category,
         ]);
     }
@@ -88,95 +74,58 @@ class CategoriesController extends Controller
     {
         $parents = Category::all();
         $category = new Category();
-        return view('categories.create',compact('parents','category'));
+        return view('categories.create', compact('parents', 'category'));
     }
     public function store(Request $request)
     {
 
-        $clean =$request->validate($this->rules() , $this->messages);
+        $clean = $request->validate($this->rules(), $this->messages);
 
-        //OR
-        // $clean = $this->validate($request,$rules);
-        //OR
-        //دي هي الاساس موجودة داخل validate().
-        // $validator = Validator::make($request->all(),$rules);
-        // $clean = $validator->validate();
-        // if($validator->fails()){
-        //     return redirect()->back()->withErrors($validator);
-        // }
-        // dd(
-        //     $request->name ,
-        //     $request->input('name'),
-        //     $request->post('name'),
-        //     $request->get('name'),
-        //     $request['name'],
-        //     $request->query('name')
-        // );
-        // DB::table('categories')->insert([]);
-        // $category = new Category();
-        // $category->name = $request-> input('name');
-        // $category->description = $request-> input('description');
-        // $category->parent_id = $request-> input('parent_id');
-        // $category->slug = Str::slug($request-> input('name'));
-        // $category->save();
         $data = $request->all();
-        // dd($data);
-        if(! $data['slug']){
+        if (! $data['slug']) {
             $data['slug'] = Str::slug($data['name']);
-
         };
 
         $category = Category::create($data);
         return redirect(route('categories.index'))
-        ->with('success','Category is Created!');
-
+            ->with('success', 'Category is Created!');
     }
     public function edit(Category $category)
     {
-        // $category = Category::findOrFail($id);
+
         $parents = Category::all();
-        // dd($parent_id);
 
-        return view('categories.edit',
-    [
-        'category' => $category ,
-        'parents' => $parents ,
-    ]);
 
+        return view(
+            'categories.edit',
+            [
+                'category' => $category,
+                'parents' => $parents,
+            ]
+        );
     }
-    public function update(Request $request ,Category $category)
+    public function update(Request $request, Category $category)
     {
-        // $category = Category::findOrFail($id);
 
-        $clean =$request->validate($this->rules( ) , $this->messages);
+
+        $clean = $request->validate($this->rules(), $this->messages);
 
         $data = $request->all();
 
         $category->update($data);
 
-        // $category->name = $request->input('name');
-        // $category->description = $request->input('description');
-        // $category->parent_id = $request->input('parent_id');
-        // $category->slug = Str::slug($category->name);
-        // $category->save();
 
 
         return redirect(route('categories.index'))
-        ->with('warning','Category is Updated!');
-
-
+            ->with('warning', 'Category is Updated!');
     }
     public function destroy(Category $category)
     {
 
-            $category->delete();
+        $category->delete();
 
 
-        // session()->flash('success', 'Category Deleted!');
-        Session::flash('error','Category is Deleted!');
+        Session::flash('error', 'Category is Deleted!');
         return redirect(route('categories.index'));
-        // ->with('success','Category is deleted!');
-
     }
-
 }

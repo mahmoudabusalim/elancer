@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 
 class CategoriesController extends Controller
 {
+    
     protected $rules=[
             'name'=>['required',
             'string',
@@ -45,7 +46,7 @@ class CategoriesController extends Controller
     public function index($id = null)
     {
 
-    //    $categories1 = DB::table('categories')->get();
+
        $categories = Category::all();
 
        $title = 'Categories';

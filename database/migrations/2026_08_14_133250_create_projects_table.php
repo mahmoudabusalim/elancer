@@ -14,10 +14,11 @@ return new class extends Migration
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('category_id')->nullable()->constrained('categories')->nullOnDelete();
             $table->string('title');
             $table->text('description');
-            $table->enum('status',['open','in-progress','closed']);
-            $table->enum('type',['hourly','fixed']);
+            $table->enum('status', ['open', 'in-progress', 'closed']);
+            $table->enum('type', ['hourly', 'fixed']);
             $table->float('budget')->unsigned()->nullable();
             $table->timestamps();
         });

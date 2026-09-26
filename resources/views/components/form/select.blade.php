@@ -5,14 +5,16 @@
     'selected'=>'',
     'options'=>[],
 ])
+@if(isset($label))
 <label for="{{$id}}" >{{ $label }}</label>
+@endif
     <select 
     id="{{ $id }}" 
     name="{{ $name }}" 
     {{ $attributes->class(['form-control','is-invalid'=>$errors->has($name)]) }}
 
     >
-        <option value="">No parent</option>
+        <option value="">No</option>
 
 
         @foreach ($options as $value=>$text)

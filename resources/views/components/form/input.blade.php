@@ -7,8 +7,9 @@
 
 ])
 
-
+@if(isset($label))
 <label for="{{ $id }}">{{$label}}</label>
+@endif
 <input 
 type="{{ $type }}" 
 id="{{ $id }}" 

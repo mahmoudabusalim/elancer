@@ -23,10 +23,10 @@ class ProjectRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['required','string','max:255'],
-            'discreption'=>['required','string'],
-            'type'=>['required','in:hourly,fixed'],
-            'budget'=>['nullable','numeric','min:0'],
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string'],
+            'type' => ['required', 'in:hourly,fixed'],
+            'budget' => ['nullable', 'numeric', 'min:0'],
         ];
     }
 
