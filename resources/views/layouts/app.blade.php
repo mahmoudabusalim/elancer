@@ -149,7 +149,7 @@
 					<!-- Messages -->
 					<div class="header-notifications user-menu">
 						<div class="header-notifications-trigger">
-							<a href="#"><div class="user-avatar status-online"><img src="{{ Auth::user()->profile_photo_url }}" alt=""></div></a>
+							<a href="#"><div class="user-avatar status-online"><img src="{{Auth::user()->getProfilePhotoPathAttribute()}}" alt=""></div></a>
 						</div>
 
 						<!-- Dropdown -->
@@ -160,9 +160,10 @@
 
 								<!-- User Name / Avatar -->
 								<div class="user-details">
-									<div class="user-avatar status-online"><img src="images/user-avatar-small-01.jpg" alt=""></div>
+    
+									<div class="user-avatar status-online"><img src="{{Auth::user()->profile_photo_path}}" alt=""></div>
 									<div class="user-name">
-										{{--    } <span>Freelancer</span> --}}
+									{{Auth::user()->name }}<span>Freelancer</span>
 									</div>
 								</div>
 

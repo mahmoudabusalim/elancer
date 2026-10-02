@@ -76,11 +76,13 @@
                             </div>
                             @if (is_array($project->attachments))
                             <div>
+                              
                                 <ul>
                                     @foreach ($project->attachments as $file)
-                                    <li><a href="{{ asset('uploads/' . $file) }}">{{ basename($file) }}</a></li>
+                                    <li><a href="{{ asset('/uploads/' . $file) }}">{{ basename($file) }}</a></li>
                                     @endforeach
                                 </ul>
+                
                             </div>
                             @endif
                         </div>

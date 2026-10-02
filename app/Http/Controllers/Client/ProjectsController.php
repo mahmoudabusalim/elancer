@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Client\ProjectRequest;
 use App\Models\Project;
+use App\Models\User;
 use App\Models\Category;
 use App\Models\Tag;
 // use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProjectsController extends Controller
@@ -21,9 +24,9 @@ class ProjectsController extends Controller
         $user = Auth::user();
         // $projects = Project::where('user_id', '=' , $user->id )->paginate();
         // use egerlouding بنستخدم الegerlouding عشان نقلل عدد جمل الاستعلام الي بتتعمل علي BD
-        
-        $projects = $user->projects()->with('category.parent','tags')->paginate();
-        return view('client.projects.index',compact('projects'));
+
+        $projects = $user->projects()->with('category.parent', 'tags')->paginate();
+        return view('client.projects.index', compact('projects'));
     }
 
     /**
@@ -31,13 +34,15 @@ class ProjectsController extends Controller
      */
     public function create()
     {
-        return view('client.projects.create',
-        [
-            'project' => new Project(),
-            'types' => Project::types(),
-            'categories' => $this->categories(),
-            'tags' => [],
-        ]);
+        return view(
+            'client.projects.create',
+            [
+                'project' => new Project(),
+                'types' => Project::types(),
+                'categories' => $this->categories(),
+                'tags' => [],
+            ]
+        );
     }
 
     /**
@@ -45,23 +50,26 @@ class ProjectsController extends Controller
      */
     public function store(ProjectRequest $request)
     {
-        
+
+
 
         $user = $request->user();
-       
-        $project = $user->projects()->create($request->all()); 
+        $data = $request->except('attachments');
+        $data['attachments'] = $this->uploadAttachments($request);
 
-        $tags = explode(',',$request->input('tags'));
+
+
+        $project = $user->projects()->create($data);
+
+        $tags = explode(',', $request->input('tags'));
         $project->syncTags($tags);
-        
+
 
 
 
         return redirect()
-        ->route('client.projects.index')
-        ->with('success','Project added');
-
-
+            ->route('client.projects.index')
+            ->with('success', 'Project added');
     }
 
     /**
@@ -71,10 +79,12 @@ class ProjectsController extends Controller
     {
         $user = Auth::user();
         $project = $user->projects()->findOrFail($id);
-        return view('client.projects.show',
-        [
-            'project'=>$project,
-        ]);
+        return view(
+            'client.projects.show',
+            [
+                'project' => $project,
+            ]
+        );
     }
 
     /**
@@ -83,12 +93,13 @@ class ProjectsController extends Controller
     public function edit(string $id)
     {
         $user = Auth::user();
+        
         $project = $user->projects()->findOrFail($id);
         $tags = $project->tags()->pluck('name')->toArray();
         $types = Project::types();
         $categories = $this->categories();
 
-        return view('client.projects.edit',compact(['project','types','categories', 'tags']));
+        return view('client.projects.edit', compact(['project', 'types', 'categories', 'tags']));
     }
 
     /**
@@ -99,15 +110,18 @@ class ProjectsController extends Controller
         $user = Auth::user();
         $project = $user->projects()->findOrFail($id);
 
-        $project->update($request->all());
+        $data = $request->except('attachments');
+        $data['attachments'] = array_merge(($project->attachments ?? [] ),
+        $this->uploadAttachments($request));
 
-        $tags = explode(',',$request->input('tags'));
+        $project->update($data);
+
+        $tags = explode(',', $request->input('tags'));
         $project->syncTags($tags);
 
         return redirect()
-        ->route('client.projects.index')
-        ->with('success','Project updated');
-
+            ->route('client.projects.index')
+            ->with('success', 'Project updated');
     }
 
     /**
@@ -115,24 +129,48 @@ class ProjectsController extends Controller
      */
     public function destroy(string $id)
     {
-        // Project::where('user_id',Auth::id())
-        // ->where('id',$id)
-        // ->delete();
 
-        //Or
         $user = Auth::user();
 
-        $user->projects()->where('id',$id)->delete();
+        $project = $user->projects()->findOrFail($id);
 
+        if(isset($project->attachments)):
+            foreach ($project->attachments as $attachment):
+                //unlink(storage_path('app/public/' .$attachmet));
+                Storage::disk('uploads')->delete($attachment);
+            endforeach;
+        endif;
+
+          $project->delete();
 
         return redirect()
-        ->route('client.projects.index')
-        ->with('success','Project Deleted');
+            ->route('client.projects.index')
+            ->with('success', 'Project Deleted');
     }
 
     protected function categories()
     {
-        return Category::pluck('name','id')->toArray();
+        return Category::pluck('name', 'id')->toArray();
+    }
 
+    protected function uploadAttachments(ProjectRequest $request)
+    {
+        if (!$request->hasFile('attachments')):
+            return;
+        endif;
+
+        $files = $request->file('attachments');
+        $attachments = [];
+
+        foreach ($files as $file):
+            if ($file->isValid()):
+
+                $path = $file->store('/attachments', [
+                    'disk' => 'uploads'
+                ]);
+                $attachments[] = $path;
+            endif;
+        endforeach;
+        return $attachments;
     }
 }

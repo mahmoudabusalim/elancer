@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('first_name');
             $table->string('last_name');
             $table->string('title')->nullable();
-            $table->string('ptofile_photo_path')->nullable();
+            $table->string('profile_photo_path')->nullable();
             $table->string('country')->default('eg');
             $table->enum('gender',['male','female'])->nullable();
             $table->date('birthday')->nullable();

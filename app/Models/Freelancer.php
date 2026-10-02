@@ -10,6 +10,7 @@ class Freelancer extends Model
     protected $fillable = [
         'first_name',
         'last_name',
+        'profile_photo_path',
         'discription',
         'gander',
         'birthday',
@@ -17,6 +18,10 @@ class Freelancer extends Model
         'hourly_rate',
         'country',
 
+    ];
+    protected $casts = [
+        'birthday'=> 'date',
+        'hourly_rate' => 'float',
     ];
 
     public function user(){

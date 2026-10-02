@@ -15,8 +15,12 @@ class Project extends Model
         'status',
         'type',
         'budget',
+        'attachments',
         
     ];
+    protected $casts = [
+    'attachments' => 'json',
+];
     const TYPE_FIXED = 'fixed';
     const TYPE_HOURLY = 'hourly';
 
